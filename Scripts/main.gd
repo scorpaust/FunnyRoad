@@ -1,0 +1,68 @@
+extends Node
+
+const new_car1 = preload("res://Scenes/car1.tscn")
+
+const new_car2 = preload("res://Scenes/car2.tscn")
+
+const new_car3 = preload("res://Scenes/car3.tscn")
+
+const new_train = preload("res://Scenes/train.tscn")
+
+func _ready():
+	pass
+
+func _process(delta):
+	if get_node("Camera Position").translation.z >= -30:		
+		get_node("Camera Position").translate(Vector3(0,0,-1) * delta)
+
+func _on_Spawn_1_timeout():	
+	spawn_car("Car Position/Car 1")
+	spawn_car("Car Position/Car 2")
+	spawn_car("Car Position/Car 3")
+	spawn_car("Car Position/Car 4")
+
+func spawn_car(position):
+	
+	randomize()
+	
+	var r = int(rand_range(0,3))
+	
+	var car = new_car1
+
+	if r == 0:
+		car = new_car1.instance()
+	
+	elif r == 1:
+		car = new_car2.instance()
+	
+	else:
+		car = new_car3.instance()
+	
+	
+	get_node(position).add_child(car)	
+	
+	get_node("Car Position/Spawn 1").wait_time = rand_range(0.5, 2)
+
+func spawn_train():
+	var train = new_train.instance()
+	
+	get_node("Car Position/Train").add_child(train)
+
+
+func _on_Train_Spawn_timeout():
+	spawn_train()
+	pass # Replace with function body.
+
+
+func _on_Area_area_entered(area):
+	if area.name == "Car":
+		get_node("Player/Anim").play("Smashed")
+	
+	if area.name == "TrainArea":
+		get_tree().reload_current_scene()
+	pass # Replace with function body.
+
+
+func _on_Anim_animation_finished(anim_name):
+	print("Lost 1 life")
+	pass # Replace with function body.
