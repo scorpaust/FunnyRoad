@@ -9,7 +9,7 @@ const new_car3 = preload("res://Scenes/car3.tscn")
 const new_train = preload("res://Scenes/train.tscn")
 
 func _ready():
-	pass
+	count_life()
 
 func _process(delta):
 	if get_node("Camera Position").translation.z >= -30:		
@@ -55,14 +55,41 @@ func _on_Train_Spawn_timeout():
 
 
 func _on_Area_area_entered(area):
-	if area.name == "Car":
-		get_node("Player/Anim").play("Smashed")
 	
-	if area.name == "TrainArea":
-		get_tree().reload_current_scene()
-	pass # Replace with function body.
-
-
+	if get_node("Player").alive:
+		if area.name == "Car":
+			index.life -= 1
+			get_node("Player/Anim").play("Smashed")
+			get_node("Player").alive = false
+		
+		if area.name == "TrainArea":
+			index.life -= 1
+			get_node("Player/Anim").play("Smashed")
+			get_node("Player").alive = false
+		
+		if area.name == "CoinArea" or area.name == "CoinArea2":
+			index.pts += 1
+			get_node("Sign/Score").text = str(index.pts)
+			area.get_parent().queue_free()
+			
 func _on_Anim_animation_finished(anim_name):
-	print("Lost 1 life")
-	pass # Replace with function body.
+	if index.life >= 0:
+		get_tree().reload_current_scene()
+
+func count_life():
+	
+	if index.life == 2:
+		get_node("Sign/3").hide()
+		
+	elif index.life == 1:
+		get_node("Sign/3").hide()
+		get_node("Sign/2").hide()
+
+	elif index.life == 0:
+		get_node("Calls/Anim").play("GameOver")
+
+
+func _on_End_area_entered(area):
+	if area.name == "PlayerArea":
+		if index.pts == 10:
+			get_tree().change_scene()
